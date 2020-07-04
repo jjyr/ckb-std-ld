@@ -1,10 +1,10 @@
 [package]
-authors = ["Jorge Aparicio <jorge@japaric.io>"]
+authors = ["Nervos DT <dt-devops@nervos.org>"]
 categories = ["command-line-utilities", "embedded", "no-std"]
-description = "Zero cost stack overflow protection for ARM Cortex-M devices"
-keywords = ["arm", "cortex-m", "stack", "overflow"]
+description = "Zero cost stack overflow protection for CKB-VM"
+keywords = ["RISC-V", "stack", "overflow"]
 license = "MIT OR Apache-2.0"
-name = "cortex-m-rt-ld"
+name = "ckb-std-ld"
 readme = "README.md"
-repository = "https://github.com/japaric/cortex-m-rt-ld"
-version = "0.1.1"
+repository = "https://github.com/jjyr/ckb-std-ld"
+version = "0.1.0"

@@ -1,17 +1,18 @@
 //! Zero cost stack overflow protection
-//!
-//! For details check out the documentation of the [`cortex-m-rt`] crate.
-//!
-//! [`cortex-m-rt`]: https://docs.rs/cortex-m-rt/0.3.13/cortex_m_rt/#zero-cost-stack-overflow-protection
 
 use std::env;
 use std::process::Command;
+
+const DEFAULT_LD: &'static str = "rust-lld";
+const DEFAULT_SIZE: &'static str = "riscv64-unknown-elf-size";
+const ENV_LD: &'static str = "CKB_STD_LD";
 
 fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
 
     // run the linker exactly as `rustc` instructed
-    let mut ld1 = Command::new("arm-none-eabi-ld");
+    let ld_cmd = env::var(ENV_LD).unwrap_or_else(|_| DEFAULT_LD.to_string());
+    let mut ld1 = Command::new(&ld_cmd);
     ld1.args(&args);
     eprintln!("{:?}", ld1);
     assert!(ld1.status().unwrap().success());
@@ -30,7 +31,7 @@ fn main() {
 
     // shell out to `size` to get the size of the linker sections
     // TODO use a library instead of calling `size` (?)
-    let mut size = Command::new("arm-none-eabi-size");
+    let mut size = Command::new(DEFAULT_SIZE);
     size.arg("-A").arg(output);
     eprintln!("{:?}", size);
     let stdout = String::from_utf8(size.output().unwrap().stdout).unwrap();
@@ -44,7 +45,8 @@ fn main() {
     for line in stdout.lines() {
         if line.starts_with(".bss") {
             // e.g. .bss $bss 0x20000000
-            bss = line.split_whitespace()
+            bss = line
+                .split_whitespace()
                 .nth(1)
                 .map(|s| s.parse::<u32>().expect(".bss size should've be an integer"));
         } else if line.starts_with(".data") {
@@ -78,13 +80,13 @@ fn main() {
     let bss = bss.unwrap_or(0);
     let data = data.unwrap_or(0);
     let heap = heap.unwrap_or(0);
-    let sram = sram.expect(".stack section missing. Are you using `cortex-m-rt` v0.3.13 or newer?");
-    let ram = ram.expect(".stack section missing. Are you using `cortex-m-rt` v0.3.13 or newer?");
+    let sram = sram.expect(".stack section missing.");
+    let ram = ram.expect(".stack section missing.");
     let eram = sram + ram;
 
     let sbss = eram - bss - data - heap;
 
-    let mut ld2 = Command::new("arm-none-eabi-ld");
+    let mut ld2 = Command::new(&ld_cmd);
     ld2.arg(format!("--defsym=_sbss={}", sbss))
         .arg(format!("--defsym=_stack_start={}", sbss))
         .args(&args);

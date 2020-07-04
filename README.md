@@ -1,13 +1,12 @@
-# `cortex-m-rt-ld`
+# `ckb-std-ld`
 
-> Zero cost stack overflow protection for ARM Cortex-M devices
+> Zero cost stack overflow protection for CKB-VM
+> This repo is forked from https://github.com/japaric/cortex-m-rt-ld and changed some hard-coded values to make it works for RISC-V VM, thanks for @japaric 's work
 
-See [this blog post](http://blog.japaric.io/stack-overflow-protection) for background information
-and [`cortex-m-rt`] documentation for usage instructions.
+* [ckb-std](https://github.com/nervosnetwork/ckb-std)
+* [capsule](https://github.com/nervosnetwork/capsule)
 
-[`cortex-m-rt`]: https://docs.rs/cortex-m-rt/0.3.13/cortex_m_rt/#zero-cost-stack-overflow-protection
-
-**IMPORTANT** `cortex-m-rt-ld` requires that the binary links to `cortex-m-rt` v0.3.13 or newer.
+See [this blog post](http://blog.japaric.io/stack-overflow-protection) (@japaric 's blog) for background information
 
 ## License
 
