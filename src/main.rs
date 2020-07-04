@@ -3,7 +3,7 @@
 use std::env;
 use std::process::Command;
 
-const DEFAULT_LD: &'static str = "rust-lld";
+const DEFAULT_LD: &'static str = "riscv64-unknown-elf-ld";
 const DEFAULT_SIZE: &'static str = "riscv64-unknown-elf-size";
 const ENV_LD: &'static str = "CKB_STD_LD";
 
