@@ -3,16 +3,17 @@
 use std::env;
 use std::process::Command;
 
-const DEFAULT_LD: &'static str = "riscv64-unknown-elf-ld";
+const DEFAULT_LD: &'static str = "rust-lld";
+const DEFAULT_LD_ARGS: [&'static str; 2] = ["-flavor", "ld.lld"];
 const DEFAULT_SIZE: &'static str = "riscv64-unknown-elf-size";
-const ENV_LD: &'static str = "CKB_STD_LD";
 
 fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
 
     // run the linker exactly as `rustc` instructed
-    let ld_cmd = env::var(ENV_LD).unwrap_or_else(|_| DEFAULT_LD.to_string());
+    let ld_cmd = DEFAULT_LD;
     let mut ld1 = Command::new(&ld_cmd);
+    ld1.args(&DEFAULT_LD_ARGS);
     ld1.args(&args);
     eprintln!("{:?}", ld1);
     assert!(ld1.status().unwrap().success());
@@ -73,8 +74,7 @@ fn main() {
                 s.parse::<u32>()
                     .expect(".heap size should've been an integer")
             });
-        } else if line.starts_with(".") {
-            // other sections
+        } else if line.starts_with(".") && !line.starts_with(".debug") {
             others_size += line.split_whitespace().nth(1).map(|s| {
                 s.parse::<u32>()
                     .expect(".heap size should've been an integer")
@@ -94,6 +94,7 @@ fn main() {
     let sbss = eram - bss - data - heap - others_size;
 
     let mut ld2 = Command::new(&ld_cmd);
+    ld2.args(&DEFAULT_LD_ARGS);
     ld2.arg(format!("--defsym=_sbss={}", sbss))
         .arg(format!("--defsym=_stack_start={}", sbss))
         .args(&args);
