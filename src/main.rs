@@ -42,6 +42,7 @@ fn main() {
     let mut heap = None;
     let mut sram = None;
     let mut ram = None;
+    let mut others_size = 0;
     for line in stdout.lines() {
         if line.starts_with(".bss") {
             // e.g. .bss $bss 0x20000000
@@ -72,6 +73,12 @@ fn main() {
                 s.parse::<u32>()
                     .expect(".heap size should've been an integer")
             });
+        } else if line.starts_with(".") {
+            // other sections
+            others_size += line.split_whitespace().nth(1).map(|s| {
+                s.parse::<u32>()
+                    .expect(".heap size should've been an integer")
+            }).unwrap_or_default();
         }
     }
 
@@ -84,7 +91,7 @@ fn main() {
     let ram = ram.expect(".stack section missing.");
     let eram = sram + ram;
 
-    let sbss = eram - bss - data - heap;
+    let sbss = eram - bss - data - heap - others_size;
 
     let mut ld2 = Command::new(&ld_cmd);
     ld2.arg(format!("--defsym=_sbss={}", sbss))
